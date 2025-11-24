@@ -117,14 +117,48 @@ class Board:
 
     def reveal(self, col: int, row: int) -> None:
         # TODO: Reveal a cell; if zero-adjacent, iteratively flood to neighbors.
-        # if not self.is_inbounds(col, row):
-        #     return
-        # if not self._mines_placed:
-        #     self.place_mines(col, row)
-
+        if not self.is_inbounds(col, row) or self.game_over or self.win:
+             return
+        if not self._mines_placed:
+             self.place_mines(col, row)
+        cell = self.cells[self.index(col, row)]
+        if cell.state.is_revealed or cell.state.is_flagged:
+            return
+        if cell.state.is_mine:
+            self.game_over = True
+            self._reveal_all_mines()
+            return
+        queue = [(col, row)]
+        visited = set()
         
-        # self._check_win()
-        pass
+        while queue:
+            c, r = queue.pop(0)
+            
+            if (c, r) in visited:
+                continue
+            visited.add((c, r))
+            
+            current_cell = self.cells[self.index(c, r)]
+            
+            # 이미 공개되었거나 깃발이 있다면 이 셀을 건너뛰고 다음 셀로 이동
+            if current_cell.state.is_revealed or current_cell.state.is_flagged:
+                continue
+
+            current_cell.state.is_revealed = True
+            self.revealed_count += 1
+            
+            # 5. 플러드 필 (Adjacent == 0인 경우에만 이웃을 큐에 추가)
+            if current_cell.state.adjacent == 0:
+                for n_col, n_row in self.neighbors(c, r):
+                    n_cell = self.cells[self.index(n_col, n_row)]
+                    
+                    # 지뢰가 아니고, 아직 공개되지 않은 셀만 큐에 추가
+                    if not n_cell.state.is_mine and not n_cell.state.is_revealed:
+                        queue.append((n_col, n_row))
+         
+        
+        self._check_win()
+
 
     def toggle_flag(self, col: int, row: int) -> None:
         # TODO: Toggle a flag on a non-revealed cell.
