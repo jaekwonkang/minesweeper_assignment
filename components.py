@@ -13,7 +13,7 @@ rendering, timing, or input devices.
 """
 
 import random
-from typing import List, Tuple
+from typing import List, Tuple,Set
 
 
 class CellState:
@@ -61,6 +61,8 @@ class Board:
         self.revealed_count = 0
         self.game_over = False
         self.win = False
+        self.safe_area: Set[Tuple[int, int]] = set()
+
 
     def index(self, col: int, row: int) -> int:
         """Return the flat list index for (col,row)."""
@@ -68,7 +70,8 @@ class Board:
 
     def is_inbounds(self, col: int, row: int) -> bool:
         # TODO: Return True if (col,row) is inside the board bounds.
-        pass
+        return (0 <= col < self.cols) and (0 <= row < self.rows)
+
 
     def neighbors(self, col: int, row: int) -> List[Tuple[int, int]]:
         # TODO: Return list of valid neighboring coordinates around (col,row).
