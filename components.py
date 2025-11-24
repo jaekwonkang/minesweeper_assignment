@@ -170,7 +170,13 @@ class Board:
 
     def flagged_count(self) -> int:
         # TODO: Return current number of flagged cells.
-        pass
+        count =0
+        for r in range(self.rows):
+            for c in range(self.cols):
+                cell = self.cells[self.index(c,r)]
+                count += cell.state.is_flagged
+        return count
+
 
     def _reveal_all_mines(self) -> None:
         """Reveal all mines; called on game over."""
