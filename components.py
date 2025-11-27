@@ -13,7 +13,7 @@ rendering, timing, or input devices.
 """
 
 import random
-from typing import List, Tuple,Set
+from typing import List, Tuple
 
 
 class CellState:
@@ -61,7 +61,7 @@ class Board:
         self.revealed_count = 0
         self.game_over = False
         self.win = False
-        self.safe_area: Set[Tuple[int, int]] = set()
+       
 
 
     def index(self, col: int, row: int) -> int:
@@ -165,8 +165,8 @@ class Board:
         if not self.is_inbounds(col, row):
             return
         cell = self.cells[self.index(col,row)]
-        if cell.state.is_revealed != True:
-            cell.state.is_flagged = True
+        if not cell.state.is_revealed :
+            cell.state.is_flagged = not cell.state.is_flagged
 
     def flagged_count(self) -> int:
         # TODO: Return current number of flagged cells.
