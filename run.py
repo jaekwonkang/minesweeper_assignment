@@ -71,7 +71,7 @@ class Renderer:
                 )
         pygame.draw.rect(self.screen, config.color_grid, rect, 1)
 
-    def draw_header(self, remaining_mines: int, time_text: str) -> None:
+    def draw_header(self, remaining_mines: int, time_text: str, score: int) -> None:
         """Draw the header bar containing remaining mines and elapsed time."""
         pygame.draw.rect(
             self.screen,
@@ -79,6 +79,7 @@ class Renderer:
             Rect(0, 0, config.width, config.margin_top - 4),
         )
         left_text = f"Mines: {remaining_mines}"
+        center_text = f"Score: {score}"   # 점수 표시
         right_text = f"Time: {time_text}"
         left_label = self.header_font.render(left_text, True, config.color_header_text)
         right_label = self.header_font.render(right_text, True, config.color_header_text)
@@ -123,7 +124,16 @@ class InputController:
         game = self.game
         if button == config.mouse_left:
             game.highlight_targets.clear()
+
+            # reveal 전 공개된 칸 수 저장
+            prev_revealed = game.board.revealed_count
             game.board.reveal(col,row)
+
+            # === 이슈 #5: 안전한 칸 오픈 시 점수 증가 (+10) ===
+            opened = game.board.revealed_count - prev_revealed
+            if opened > 0:
+                game.score += opened * 10
+
             if not game.started:
                 game.started = True
                 game.start_ticks_ms = pygame.time.get_ticks()
@@ -161,6 +171,10 @@ class Game:
         self.start_ticks_ms = 0
         self.end_ticks_ms = 0
 
+        # === 이슈 #5: 점수 관련 상태 ===
+        self.score = 0
+        self._win_bonus_given = False  # 승리 보너스 중복 방지
+
     def reset(self):
         """Reset the game state and start a new board."""
         self.board = Board(config.cols, config.rows, config.num_mines)
@@ -189,9 +203,9 @@ class Game:
     def _result_text(self) -> str | None:
         """Return result label to display, or None if game continues."""
         if self.board.game_over:
-            return "GAME OVER"
+            return f"GAME OVER\nScore: {self.score}"
         if self.board.win:
-            return "GAME CLEAR"
+            return f"GAME CLEAR\nScore: {self.score}"
         return None
 
     def draw(self):
@@ -201,7 +215,7 @@ class Game:
         self.screen.fill(config.color_bg)
         remaining = max(0, config.num_mines - self.board.flagged_count())
         time_text = self._format_time(self._elapsed_ms())
-        self.renderer.draw_header(remaining, time_text)
+        self.renderer.draw_header(remaining, time_text, self.score)
         now = pygame.time.get_ticks()
         for r in range(self.board.rows):
             for c in range(self.board.cols):
@@ -220,6 +234,11 @@ class Game:
                     self.reset()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 self.input.handle_mouse(event.pos, event.button)
+        # === 이슈 #5: 승리 보너스 점수 (+1000) ===
+        if self.board.win and not self._win_bonus_given:
+            self.score += 1000
+            self._win_bonus_given = True
+
         if (self.board.game_over or self.board.win) and self.started and not self.end_ticks_ms:
             self.end_ticks_ms = pygame.time.get_ticks()
         self.draw()
