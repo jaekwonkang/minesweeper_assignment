@@ -191,7 +191,11 @@ class Game:
         if self.board.game_over:
             return "GAME OVER"
         if self.board.win:
-            return "GAME CLEAR"
+            # ===== Issue #4 =====
+            # 클리어 시 걸린 시간을 함께 표시
+            elapsed_ms = self._elapsed_ms()
+            time_text = self._format_time(elapsed_ms)
+            return f"GAME CLEAR ({time_text})"
         return None
 
     def draw(self):
