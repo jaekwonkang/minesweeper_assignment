@@ -104,10 +104,18 @@ class Renderer:
         overlay = pygame.Surface((config.width, config.height), pygame.SRCALPHA)
         overlay.fill((0, 0, 0, config.result_overlay_alpha))
         self.screen.blit(overlay, (0, 0))
-        label = self.result_font.render(text, True, config.color_result)
-        rect = label.get_rect(center=(config.width // 2, config.height // 2))
-        self.screen.blit(label, rect)
+        lines = text.split('\n')
+        
+        # 전체 텍스트 덩어리의 중앙 위치 계산을 위한 시작 Y 좌표
+        total_height = len(lines) * (config.result_font_size + 10)
+        start_y = (config.height // 2) - (total_height // 2)
 
+        for i, line in enumerate(lines):
+            # 줄마다 텍스트 렌더링
+            label = self.result_font.render(line, True, config.color_result)
+            # 중앙 정렬하되, 줄 번호(i)에 따라 아래로 내려줌
+            rect = label.get_rect(center=(config.width // 2, start_y + i * (config.result_font_size + 10)))
+            self.screen.blit(label, rect)
     def draw_difficulty_menu(self) -> None:
         self.screen.fill(config.color_bg)
         title = self.result_font.render("Select Difficulty", True, config.color_result)
