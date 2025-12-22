@@ -272,67 +272,57 @@ class Game:
         return None
 
     def run_step(self) -> bool:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                return False
-
-            if not self.difficulty_selected:
-                if event.type == pygame.KEYDOWN and event.key in DIFFICULTIES:
-                    _, c, r, m = DIFFICULTIES[event.key]
-                    self.select_difficulty(c, r, m)
-                return True
-
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                self.input.handle_mouse(event.pos, event.button)
-
-        if not self.difficulty_selected:
-            temp_renderer = Renderer(self.screen, None)
-            temp_renderer.draw_difficulty_menu()
-            return True
-
-        if pygame.time.get_ticks() > self.highlight_until_ms:
-            self.highlight_targets.clear()
-
-        if (self.board.game_over or self.board.win) and self.started and not self.end_ticks_ms:
-            self.end_ticks_ms = pygame.time.get_ticks()
-
-        self.screen.fill(config.color_bg)
-        remaining = max(0, config.num_mines - self.board.flagged_count())
-        time_text = self._format_time(self._elapsed_ms())
-
-        self.renderer.draw_header(remaining, time_text)
-
-
-        self.renderer.draw_header(remaining, time_text, self.score)
-
-        now = pygame.time.get_ticks()
-        for r in range(self.board.rows):
-            for c in range(self.board.cols):
-                highlighted = (now <= self.highlight_until_ms) and ((c, r) in self.highlight_targets)
-                self.renderer.draw_cell(c, r, highlighted)
-
-        self.renderer.draw_result_overlay(self._result_text())
-        pygame.display.flip()
-
-
-    def run_step(self) -> bool:
         """Process inputs, update time, draw, and tick the clock once."""
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return False
+            
+            # 난이도 선택 전 입력 처리
+            if not self.difficulty_selected:
+                if event.type == pygame.KEYDOWN and event.key in DIFFICULTIES:
+                    _, c, r, m = DIFFICULTIES[event.key]
+                    self.select_difficulty(c, r, m)
+                return True # 난이도 선택 중에는 아래 로직 건너뜀
+
+            # 게임 중 입력 처리
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_r:
                     self.reset()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 self.input.handle_mouse(event.pos, event.button)
-        # === 이슈 #5: 승리 보너스 점수 (+1000) ===
-        if self.board.win and not self._win_bonus_given:
-            self.score += 1000
-            self._win_bonus_given = True
 
-        if (self.board.game_over or self.board.win) and self.started and not self.end_ticks_ms:
-            self.end_ticks_ms = pygame.time.get_ticks()
-        self.draw()
+        # 보드가 생성된 후에만 실행되는 로직
+        if self.board:
+            # === 이슈 #5: 승리 보너스 점수 (+1000) ===
+            if self.board.win and not self._win_bonus_given:
+                self.score += 1000
+                self._win_bonus_given = True
+
+            if (self.board.game_over or self.board.win) and self.started and not self.end_ticks_ms:
+                self.end_ticks_ms = pygame.time.get_ticks()
+
+        # 화면 그리기
+        if not self.difficulty_selected:
+            temp_renderer = Renderer(self.screen, None)
+            temp_renderer.draw_difficulty_menu()
+        else:
+            if pygame.time.get_ticks() > self.highlight_until_ms:
+                self.highlight_targets.clear()
+
+            self.screen.fill(config.color_bg)
+            remaining = max(0, config.num_mines - self.board.flagged_count())
+            time_text = self._format_time(self._elapsed_ms())
+            
+            # 헤더와 셀 그리기
+            self.renderer.draw_header(remaining, time_text, self.score)
+            now = pygame.time.get_ticks()
+            for r in range(self.board.rows):
+                for c in range(self.board.cols):
+                    highlighted = (now <= self.highlight_until_ms) and ((c, r) in self.highlight_targets)
+                    self.renderer.draw_cell(c, r, highlighted)
+
+            self.renderer.draw_result_overlay(self._result_text())
+            pygame.display.flip()
 
         self.clock.tick(config.fps)
         return True
