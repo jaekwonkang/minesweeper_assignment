@@ -9,9 +9,11 @@ This module owns:
 The logic lives in components.Board; this module should not implement rules.
 """
 
+<<<<<<< HEAD
 import sys
+=======
+>>>>>>> real-code-3
 import pygame
-
 import config
 from components import Board
 from pygame.locals import Rect
@@ -47,21 +49,28 @@ class Renderer:
         if cell.state.is_revealed:
             pygame.draw.rect(self.screen, config.color_cell_revealed, rect)
             if cell.state.is_mine:
-                pygame.draw.circle(self.screen, config.color_cell_mine, rect.center, rect.width // 4)
+                pygame.draw.circle(
+                    self.screen,
+                    config.color_cell_mine,
+                    rect.center,
+                    rect.width // 4,
+                )
             elif cell.state.adjacent > 0:
-                color = config.number_colors.get(cell.state.adjacent, config.color_text)
+                color = config.number_colors.get(
+                    cell.state.adjacent, config.color_text
+                )
                 label = self.font.render(str(cell.state.adjacent), True, color)
-                label_rect = label.get_rect(center=rect.center)
-                self.screen.blit(label, label_rect)
+                self.screen.blit(label, label.get_rect(center=rect.center))
         else:
-            base_color = config.color_highlight if highlighted else config.color_cell_hidden
+            base_color = (
+                config.color_highlight if highlighted else config.color_cell_hidden
+            )
             pygame.draw.rect(self.screen, base_color, rect)
             if cell.state.is_flagged:
-                flag_w = max(6, rect.width // 3)
-                flag_h = max(8, rect.height // 2)
                 pole_x = rect.left + rect.width // 3
                 pole_y = rect.top + 4
                 pygame.draw.line(
+<<<<<<< HEAD
                     self.screen,
                     config.color_flag,
                     (pole_x, pole_y),
@@ -69,13 +78,13 @@ class Renderer:
                     2,
                 )
                 pygame.draw.polygon(
+=======
+>>>>>>> real-code-3
                     self.screen,
                     config.color_flag,
-                    [
-                        (pole_x + 2, pole_y),
-                        (pole_x + 2 + flag_w, pole_y + flag_h // 3),
-                        (pole_x + 2, pole_y + flag_h // 2),
-                    ],
+                    (pole_x, pole_y),
+                    (pole_x, pole_y + rect.height // 2),
+                    2,
                 )
 
         pygame.draw.rect(self.screen, config.color_grid, rect, 1)
@@ -86,12 +95,14 @@ class Renderer:
             config.color_header,
             Rect(0, 0, config.width, config.margin_top - 4),
         )
-        left_text = f"Mines: {remaining_mines}"
-        right_text = f"Time: {time_text}"
-        left_label = self.header_font.render(left_text, True, config.color_header_text)
-        right_label = self.header_font.render(right_text, True, config.color_header_text)
-        self.screen.blit(left_label, (10, 12))
-        self.screen.blit(right_label, (config.width - right_label.get_width() - 10, 12))
+        left = self.header_font.render(
+            f"Mines: {remaining_mines}", True, config.color_header_text
+        )
+        right = self.header_font.render(
+            f"Time: {time_text}", True, config.color_header_text
+        )
+        self.screen.blit(left, (10, 12))
+        self.screen.blit(right, (config.width - right.get_width() - 10, 12))
 
     def draw_result_overlay(self, text: str | None) -> None:
         if not text:
@@ -100,8 +111,10 @@ class Renderer:
         overlay.fill((0, 0, 0, config.result_overlay_alpha))
         self.screen.blit(overlay, (0, 0))
         label = self.result_font.render(text, True, config.color_result)
-        rect = label.get_rect(center=(config.width // 2, config.height // 2))
-        self.screen.blit(label, rect)
+        self.screen.blit(
+            label,
+            label.get_rect(center=(config.width // 2, config.height // 2)),
+        )
 
     def draw_difficulty_menu(self) -> None:
         self.screen.fill(config.color_bg)
@@ -145,6 +158,7 @@ class InputController:
 
         game = self.game
 <<<<<<< HEAD
+<<<<<<< HEAD
 
         if button == config.mouse_left:
             game.highlight_targets.clear()
@@ -157,12 +171,23 @@ class InputController:
 
             # ================== Issue #2 추가 ==================
             # 이미 열린 숫자 칸을 클릭한 경우, 주변 자동 오픈 시도
+=======
+        cell = game.board.cells[game.board.index(col, row)]
+
+        if button == config.mouse_left:
+            game.highlight_targets.clear()
+
+            # 이미 열린 숫자 칸 클릭 시 자동 오픈 시도
+>>>>>>> real-code-3
             if cell.state.is_revealed and cell.state.adjacent > 0:
                 game.board.reveal_around_if_flag_match(col, row)
             else:
                 game.board.reveal(col, row)
 
+<<<<<<< HEAD
 >>>>>>> real-code
+=======
+>>>>>>> real-code-3
             if not game.started:
                 game.started = True
                 game.start_ticks_ms = pygame.time.get_ticks()
@@ -176,9 +201,19 @@ class InputController:
             game.highlight_targets = {
                 (nc, nr)
                 for (nc, nr) in neighbors
+<<<<<<< HEAD
                 if not game.board.cells[game.board.index(nc, nr)].state.is_revealed
             }
             game.highlight_until_ms = pygame.time.get_ticks() + config.highlight_duration_ms
+=======
+                if not game.board.cells[
+                    game.board.index(nc, nr)
+                ].state.is_revealed
+            }
+            game.highlight_until_ms = (
+                pygame.time.get_ticks() + config.highlight_duration_ms
+            )
+>>>>>>> real-code-3
 
 
 class Game:
@@ -271,11 +306,37 @@ class Game:
         now = pygame.time.get_ticks()
         for r in range(self.board.rows):
             for c in range(self.board.cols):
-                highlighted = (now <= self.highlight_until_ms) and ((c, r) in self.highlight_targets)
+                highlighted = (
+                    (now <= self.highlight_until_ms)
+                    and ((c, r) in self.highlight_targets)
+                )
                 self.renderer.draw_cell(c, r, highlighted)
 
         self.renderer.draw_result_overlay(self._result_text())
         pygame.display.flip()
+<<<<<<< HEAD
+=======
+
+    def run_step(self) -> bool:
+        """Process inputs, update time, draw, and tick the clock once."""
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                return False
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_h:
+                    self.board.reveal_safe_hint()
+                if event.key == pygame.K_r:
+                    self.reset()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                self.input.handle_mouse(event.pos, event.button)
+        if (
+            (self.board.game_over or self.board.win)
+            and self.started
+            and not self.end_ticks_ms
+        ):
+            self.end_ticks_ms = pygame.time.get_ticks()
+        self.draw()
+>>>>>>> real-code-3
         self.clock.tick(config.fps)
         return True
 
