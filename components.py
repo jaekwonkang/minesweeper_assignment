@@ -63,7 +63,6 @@ class Board:
         self.win = False
        
 
-
     def index(self, col: int, row: int) -> int:
         """Return the flat list index for (col,row)."""
         return row * self.cols + col
@@ -158,6 +157,39 @@ class Board:
          
         
         self._check_win()
+
+
+    # ================== Issue #2 추가 ==================
+    def reveal_around_if_flag_match(self, col: int, row: int) -> None:
+        """
+        [Issue #2]
+        이미 열린 숫자 칸을 클릭했을 때,
+        주변 깃발 개수가 숫자와 같으면
+        깃발이 아닌 주변 칸을 모두 오픈한다.
+        """
+        cell = self.cells[self.index(col, row)]
+
+        # 이미 열린 숫자 칸만 대상
+        if not cell.state.is_revealed or cell.state.adjacent == 0:
+            return
+
+        neighbors = self.neighbors(col, row)
+
+        # 주변 깃발 개수 계산
+        flag_count = 0
+        for n_col, n_row in neighbors:
+            if self.cells[self.index(n_col, n_row)].state.is_flagged:
+                flag_count += 1
+
+        # 깃발 개수가 숫자와 다르면 아무 동작 안 함
+        if flag_count != cell.state.adjacent:
+            return
+
+        # 깃발이 아닌 주변 칸을 모두 reveal
+        for n_col, n_row in neighbors:
+            neighbor_cell = self.cells[self.index(n_col, n_row)]
+            if not neighbor_cell.state.is_flagged and not neighbor_cell.state.is_revealed:
+                self.reveal(n_col, n_row)
 
 
     def toggle_flag(self, col: int, row: int) -> None:
