@@ -42,7 +42,3 @@ h를 누른면
 - **스크린샷**:
 - <img width="405" height="494" alt="image" src="https://github.com/user-attachments/assets/a93ce297-f350-4b5a-990e-9b15dda245f9" />
 
-<img width="569" height="439" alt="image" src="https://github.com/user-attachments/assets/79d0854b-f16a-43f5-b27b-ca04f8cf8a66" />
-
-
----
