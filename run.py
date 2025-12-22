@@ -107,14 +107,13 @@ class Renderer:
         lines = text.split('\n')
         
         # 전체 텍스트 덩어리의 중앙 위치 계산을 위한 시작 Y 좌표
-        total_height = len(lines) * (config.result_font_size + 10)
+        line_spacing = config.result_font_size * 0.8
+        total_height = len(lines) * line_spacing
         start_y = (config.height // 2) - (total_height // 2)
 
         for i, line in enumerate(lines):
-            # 줄마다 텍스트 렌더링
             label = self.result_font.render(line, True, config.color_result)
-            # 중앙 정렬하되, 줄 번호(i)에 따라 아래로 내려줌
-            rect = label.get_rect(center=(config.width // 2, start_y + i * (config.result_font_size + 10)))
+            rect = label.get_rect(center=(config.width // 2, start_y + i * line_spacing))
             self.screen.blit(label, rect)
     def draw_difficulty_menu(self) -> None:
         self.screen.fill(config.color_bg)
@@ -273,10 +272,12 @@ class Game:
         return f"{minutes:02d}:{seconds:02d}"
 
     def _result_text(self) -> str | None:
+        time_str = self._format_time(self._elapsed_ms())
+        
         if self.board.game_over:
-            return f"GAME OVER\nScore: {self.score}"
+            return f"GAME OVER\nScore: {self.score}\nTime: {time_str}"
         if self.board.win:
-            return f"GAME CLEAR\nScore: {self.score}"
+            return f"GAME CLEAR\nScore: {self.score}\nTime: {time_str}"
         return None
 
     def run_step(self) -> bool:
