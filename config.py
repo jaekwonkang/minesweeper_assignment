@@ -21,6 +21,7 @@ fps = 60
 cols = 16
 rows = 16
 num_mines = 40
+# NOTE: 실제 게임 시작 시 난이도 선택에 따라 값이 변경됨
 
 # Cell size and margins
 cell_size = 32
@@ -32,6 +33,7 @@ margin_bottom = 20
 # Derived display dimension
 width = margin_left + cols * cell_size + margin_right
 height = margin_top + rows * cell_size + margin_bottom
+# NOTE: 난이도 선택 이후 cols/rows 변경 시 함께 다시 계산됨
 
 display_dimension = (width, height)
 
@@ -80,4 +82,3 @@ result_overlay_alpha = 120
 
 # Misc
 title = "Minesweeper"
-
