@@ -282,18 +282,4 @@ class Board:
         col, row = random.choice(candidates)
         self.reveal(col, row)
 
-    # ================== Issue #3 추가 ==================
-    def reveal_safe_hint(self) -> None:
-        """
-        지뢰가 아닌 미공개 칸 하나를 임의로 선택하여 오픈
-        """
-        candidates = []
-        for cell in self.cells:
-            if not cell.state.is_revealed and not cell.state.is_mine:
-                candidates.append((cell.col, cell.row))
-
-        if not candidates:
-            return
-
-        col, row = random.choice(candidates)
-        self.reveal(col, row)
+  
